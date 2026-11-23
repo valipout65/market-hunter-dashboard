@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>شکارچی بازار — داشبورد فرصت‌ها</title>
+<style>
+  :root{--bg:#0f1720;--panel:#16222e;--panel2:#1d2c3a;--ink:#e8eef4;--mut:#93a6b8;
+        --acc:#37c2a0;--acc2:#f0b429;--line:#27384a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:Vazirmatn,"Segoe UI",Tahoma,sans-serif;font-size:14px;line-height:1.7}
+  header{padding:22px 26px 14px;border-bottom:1px solid var(--line);
+         background:linear-gradient(180deg,#16222e,#0f1720)}
+  h1{margin:0;font-size:20px;font-weight:700}
+  .sub{color:var(--mut);font-size:12.5px;margin-top:4px}
+  .wrap{padding:18px 26px 60px;max-width:1400px;margin:0 auto}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .card .k{color:var(--mut);font-size:12px}
+  .card .v{font-size:24px;font-weight:700;margin-top:2px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+       background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:14px}
+  input,select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);
+       border-radius:8px;padding:7px 10px;font-family:inherit;font-size:13px}
+  input[type=search]{min-width:220px;flex:1}
+  label.chk{display:flex;gap:6px;align-items:center;color:var(--mut);font-size:12.5px;cursor:pointer}
+  .btn{background:var(--acc);color:#06231c;border:0;border-radius:8px;padding:8px 14px;
+       font-family:inherit;font-weight:700;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--acc);border:1px solid var(--acc)}
+  table{width:100%;border-collapse:collapse;background:var(--panel);
+        border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--panel2);font-size:12.5px;color:var(--mut);cursor:pointer;white-space:nowrap}
+  tr:hover td{background:#1b2a38}
+  td.t{max-width:430px}
+  .score{font-weight:700;color:var(--acc)}
+  .pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11.5px;border:1px solid var(--line);color:var(--mut)}
+  .pill.warn{color:var(--acc2);border-color:#4a3a12;background:#2a2312}
+  .pill.dang{color:#ff8a8a;border-color:#5a2222;background:#2a1616}
+  .pill.ok{color:var(--acc);border-color:#17453a;background:#122b25}
+  #detail{margin-top:16px}
+  .dbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .dbox h2{margin:0 0 4px;font-size:16px}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 18px;margin:12px 0}
+  .kv{font-size:13px}.kv b{color:var(--mut);font-weight:400}
+  .bk{width:100%;font-size:12.5px;margin-top:8px}
+  .bk td{padding:5px 8px;border-bottom:1px dashed var(--line)}
+  .muted{color:var(--mut)}
+  a{color:var(--acc)}
+  footer{margin-top:22px;color:var(--mut);font-size:12px;line-height:1.9}
+  .empty{padding:26px;text-align:center;color:var(--mut)}
+  @media print{body{background:#fff;color:#000}.bar,.btn{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>شکارچی بازار — داشبورد فرصت‌ها</h1>
+  <div class="sub">۱ آذر ۱۴۰۵ – ۲۳:۵۰ تهران — منبع: سطح ۳ (تأییدنشده) · سقف امتیاز تأییدشده ۶۵</div>
+</header>
+<div class="wrap">
+  <div class="cards" id="cards"></div>
+
+  <div class="bar">
+    <input type="search" id="q" placeholder="جستجو در عنوان، خریدار، استان…">
+    <select id="dom"><option value="">همه حوزه‌ها</option></select>
+    <select id="sort">
+      <option value="raw">مرتب: امتیاز خام</option>
+      <option value="days">مرتب: نزدیک‌ترین مهلت</option>
+      <option value="dl">مرتب: تاریخ مهلت</option>
+    </select>
+    <label class="chk"><input type="checkbox" id="urg"> فقط مهلت ≤ ۷ روز</label>
+    <label class="chk"><input type="checkbox" id="r2"> فقط دوره ۲ (غذا)</label>
+    <button class="btn ghost" id="csv">CSV</button>
+  </div>
+
+  <table>
+    <thead><tr>
+      <th data-s="title">فرصت</th><th data-s="org">خریدار</th><th data-s="prov">استان</th>
+      <th data-s="cat">دسته</th><th data-s="dl">مهلت</th><th data-s="days">روز</th>
+      <th data-s="raw">امتیاز خام</th><th data-s="total">تأییدشده</th>
+    </tr></thead>
+    <tbody id="tb"></tbody>
+  </table>
+
+  <div id="detail"><div class="dbox"><span class="muted">برای دیدن جزئیات و اقدام بعدی، روی یک ردیف کلیک کنید.</span></div></div>
+
+  <footer>
+    این داشبورد از خروجی دو دوره اجرای «شکارچی بازار» ساخته شده است. مبلغ برآورد، ضمانت و شماره تماس در منبع اصلی «اعلام نشده» است،
+    بنابراین هیچ عدد مالی در این صفحه حدس زده نشده. هر رکورد تا زمانی که سند اصلی روی سایت خریدار یا سامانه ستاد دیده نشود «تأییدنشده» می‌ماند.
+  </footer>
+</div>
+
+<script>
+const DATA = [{"id": 2210012, "title": "مناقصه خدمات طبخ غذای کارکنان و بیماران بیمارستان‌های ابن‌سینا و دکتر حجازی در مشهد", "org": "دانشگاه علوم پزشکی مشهد", "domain": "غذا و کشاورزی", "cat": "غذا و صنایع غذایی", "prov": "خراسان رضوی", "city": "مشهد", "pub": "2026-11-22", "dl": "2026-12-07", "days": 15, "raw": 80, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "2005000060000081", "url": "https://mozayedegar.com/listing/2210012", "route": "پیشنهاد قرارداد طبخ و توزیع با تیم مستقر در مشهد + نمونه کار بیمارستانی", "nxt": "دریافت اسناد فراخوان ۲۰۰۵۰۰۰۰۶۰۰۰۰۰۸۱ و بازدید آشپزخانه‌های دو بیمارستان", "sup": "شرکت‌های خدمات غذایی دارای پروانه بهداشت و سابقه بیمارستانی", "unit": "اداره کل خدمات و پشتیبانی / امور قراردادها", "judge": "دو بیمارستان زیر یک قرارداد = حجم بالا و درآمد ماهانه پایدار؛ نیازمند سابقه بیمارستانی و پروانه بهداشت.", "parts": {"source": 3, "fit": 5, "prob": 4, "money": 4, "urg": 5, "comp": 3, "complete": 4}, "run": "۲"}, {"id": 2209255, "title": "مناقصه تأمین کارتن پنیر، ماست و کره و سینی شیر و خامه به مدت شش ماه در مشهد", "org": "شیر پاستوریزه پگاه", "domain": "غذا و کشاورزی", "cat": "بسته‌بندی", "prov": "خراسان رضوی", "city": "مشهد", "pub": "2026-11-22", "dl": "2026-12-01", "days": 9, "raw": 79, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "اعلام نشده", "url": "https://mozayedegar.com/listing/2209255", "route": "پیشنهاد قرارداد تأمین بسته‌بندی ۶ ماهه (کارتن + سینی)", "nxt": "استعلام تیراژ ماهانه، گرماژ و طرح چاپ از واحد بازرگانی", "sup": "تولیدکنندگان کارتن و ظروف بسته‌بندی لبنی", "unit": "واحد بازرگانی شیر پاستوریزه پگاه مشهد", "judge": "قرارداد ۶ ماهه = سفارش تکراری تضمین‌شده؛ مزیت با موجودی کاغذ و چاپ داخلی.", "parts": {"source": 3, "fit": 5, "prob": 4, "money": 4, "urg": 5, "comp": 3, "complete": 3}, "run": "۲"}, {"id": 2205833, "title": "مناقصه خدمات تغذیه دانشجویان شامل تأمین مواد اولیه، پخت و توزیع غذای برنجی در سلف مکمل شماره ۲ همدان", "org": "دانشگاه بوعلی سینا همدان", "domain": "غذا و کشاورزی", "cat": "غذا و صنایع غذایی", "prov": "همدان", "city": "همدان", "pub": "2026-11-19", "dl": "2026-12-01", "days": 9, "raw": 77, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "2005000395000023", "url": "https://mozayedegar.com/listing/2205833", "route": "پیشنهاد خدمات تغذیه دانشجویی (تأمین مواد اولیه + پخت + توزیع)", "nxt": "دریافت اسناد ۲۰۰۵۰۰۰۳۹۵۰۰۰۰۲۳ و برآورد تعداد وعده روزانه", "sup": "شرکت‌های خدمات تغذیه با سابقه دانشگاهی", "unit": "معاونت دانشجویی دانشگاه بوعلی سینا", "judge": "سه فراخوان موازی همین دانشگاه در یک روز = نیاز فوری به ظرفیت؛ امکان گرفتن هر سه.", "parts": {"source": 3, "fit": 5, "prob": 4, "money": 3, "urg": 5, "comp": 3, "complete": 4}, "run": "۲"}, {"id": 2208880, "title": "مناقصه تأمین غذای پرسنل پالایشگاه نفت پایا در بندرعباس", "org": "شرکت پالایش نفت پایا", "domain": "غذا و کشاورزی", "cat": "غذا و صنایع غذایی", "prov": "هرمزگان", "city": "بندرعباس", "pub": "2026-11-22", "dl": "2026-11-25", "days": 2, "raw": 76, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2208880", "route": "پیشنهاد خدمات طبخ و توزیع غذا به‌صورت قرارداد ماهانه", "nxt": "استعلام تعداد پرس روزانه و شرایط محل تحویل در بندرعباس", "sup": "شرکت‌های خدمات غذایی دارای پروانه بهداشت", "unit": "اداری/رفاهی شرکت پالایش نفت پایا", "judge": "خدمات جاری با درآمد ماهانه؛ ورود آسان‌تر از پروژه‌های عمرانی.", "parts": {"source": 3, "fit": 5, "prob": 4, "money": 3, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}, {"id": 2204630, "title": "مناقصه خدمات تهیه مواد اولیه، طبخ و توزیع غذای پرسنل کارخانه سیمان فیروزکوه", "org": "سیمان فیروزکوه", "domain": "غذا و کشاورزی", "cat": "غذا و صنایع غذایی", "prov": "تهران", "city": "فیروزکوه", "pub": "2026-11-18", "dl": "2026-11-25", "days": 2, "raw": 76, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2204630", "route": "پیشنهاد قرارداد طبخ و توزیع غذا", "nxt": "استعلام ظرفیت پرس روزانه و محل سرو", "sup": "شرکت‌های خدمات غذایی", "unit": "واحد رفاهی/اداری سیمان فیروزکوه", "judge": "نیاز مستمر کارخانه؛ تکرارپذیر و قابل توسعه به کارخانه‌های همجوار.", "parts": {"source": 3, "fit": 5, "prob": 4, "money": 3, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}, {"id": 2185006, "title": "مناقصه خرید ۵۰ دستگاه پرینتر و ۱۰ دستگاه اسکنر در ری", "org": "شرکت گوهریاران خدمات پویا", "domain": "تجارت و پخش", "cat": "تجهیزات اداری و فروشگاهی", "prov": "تهران", "city": "ری", "pub": "2026-11-10", "dl": "2026-11-30", "days": 7, "raw": 76, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2185006", "route": "پیشنهاد مستقیم سریع (کالای موجود در بازار)", "nxt": "ارسال پیشنهاد قیمت برای ۵۰ پرینتر و ۱۰ اسکنر با گارانتی", "sup": "توزیع‌کنندگان تجهیزات اداری", "unit": "واحد فناوری اطلاعات شرکت گوهریاران", "judge": "کم‌ریسک‌ترین نوع معامله: کالای آماده، مهلت کافی، تصمیم سریع.", "parts": {"source": 3, "fit": 5, "prob": 4, "money": 2, "urg": 5, "comp": 4, "complete": 4}, "run": "۱"}, {"id": 2209119, "title": "مناقصه طبخ و توزیع غذای گرم کارکنان عملیاتی در اهواز و اندیمشک", "org": "شرکت ملی پالایش و پخش فراورده های نفتی ایران", "domain": "غذا و کشاورزی", "cat": "غذا و صنایع غذایی", "prov": "خوزستان", "city": "اهواز", "pub": "2026-11-22", "dl": "2026-12-14", "days": 22, "raw": 76, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "2005092196000018", "url": "https://mozayedegar.com/listing/2209119", "route": "پیشنهاد خدمات پذیرایی صنعتی در دو سایت (اهواز و اندیمشک)", "nxt": "دریافت اسناد ۲۰۰۵۰۹۲۱۹۶۰۰۰۰۱۸ و بررسی الزامات HSE سایت", "sup": "شرکت‌های خدمات غذایی با توان عملیات در سایت‌های نفتی", "unit": "امور بازرگانی شرکت ملی پالایش و پخش", "judge": "مهلت ۲۲ روزه (بیشترین زمان در این حوزه) و کارفرمای بزرگ؛ الزامات HSE سد ورود رقبای کوچک است.", "parts": {"source": 3, "fit": 5, "prob": 4, "money": 4, "urg": 3, "comp": 3, "complete": 4}, "run": "۲"}, {"id": 2209263, "title": "مناقصه خرید ۳ میلیون متر نوار تیپ درزدار ۱۷۵ میکرون، دبی ۲.۵ لیتر در ساعت و قطره‌چکان هر ۲۰ سانتی‌متر در مشهد", "org": "باغداری و زراعت مشهد", "domain": "غذا و کشاورزی", "cat": "کشاورزی", "prov": "خراسان رضوی", "city": "مشهد", "pub": "2026-11-22", "dl": "2026-12-02", "days": 10, "raw": 75, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "اعلام نشده", "url": "https://mozayedegar.com/listing/2209263", "route": "پیشنهاد تأمین نوار تیپ و اتصالات به‌صورت بسته کامل آبیاری", "nxt": "استعلام مقدار دقیق اتصالات و شرایط تحویل در مشهد", "sup": "تولیدکنندگان نوار تیپ و تجهیزات آبیاری قطره‌ای", "unit": "واحد فنی شرکت باغداری و زراعت مشهد", "judge": "۳ میلیون متر = بلیت بزرگ؛ حاشیه کم ولی گردش مالی بالا.", "parts": {"source": 3, "fit": 5, "prob": 3, "money": 4, "urg": 5, "comp": 3, "complete": 3}, "run": "۲"}, {"id": 2196719, "title": "مناقصه تجمیع امور بیمه شرکت مجتمع کشتی‌سازی و صنایع فراساحل ایران در بندرعباس", "org": "شرکت مجتمع کشتی سازی و صنایع فراساحل ایران", "domain": "خدمات کسب‌وکار", "cat": "مالی/بیمه/حقوقی", "prov": "هرمزگان", "city": "بندرعباس", "pub": "2026-11-16", "dl": "2026-11-29", "days": 6, "raw": 73, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2196719", "route": "پیشنهاد از طریق کارگزار بیمه یا کنسرسیوم بیمه‌گران", "nxt": "درخواست اسناد مناقصه 2005092297000101 و ترکیب پورتفوی ریسک", "sup": "شرکت‌های بیمه و کارگزاران بیمه", "unit": "مدیریت مالی / امور بازرگانی", "judge": "قرارداد بزرگ و تکرارشونده؛ اما ورود نیازمند مجوز و توان پذیرش ریسک است.", "parts": {"source": 3, "fit": 5, "prob": 3, "money": 4, "urg": 5, "comp": 2, "complete": 3}, "run": "۱"}, {"id": 2209203, "title": "مناقصه قرارداد خدمات پشتیبانی، طبخ و توزیع غذای بیمارستانی در جاجرم", "org": "دانشگاه علوم پزشکی و خدمات بهداشتی درمانی استان خراسان شمالی", "domain": "غذا و کشاورزی", "cat": "غذا و صنایع غذایی", "prov": "خراسان شمالی", "city": "جاجرم", "pub": "2026-11-22", "dl": "2026-12-10", "days": 18, "raw": 73, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "2005000257000026", "url": "https://mozayedegar.com/listing/2209203", "route": "پیشنهاد خدمات پشتیبانی و طبخ بیمارستانی", "nxt": "دریافت اسناد ۲۰۰۵۰۰۰۲۵۷۰۰۰۰۲۶ و بازدید آشپزخانه", "sup": "شرکت‌های خدمات غذایی بیمارستانی", "unit": "معاونت درمان / امور قراردادها", "judge": "بیمارستان شهر کوچک؛ رقابت کمتر ولی حجم محدود.", "parts": {"source": 3, "fit": 5, "prob": 4, "money": 3, "urg": 3, "comp": 3, "complete": 4}, "run": "۲"}, {"id": 2208735, "title": "مناقصه تهیه، حمل و تحویل غذای گرم در رستوران‌های شرکت فاضلاب تهران", "org": "شرکت آب و فاضلاب", "domain": "غذا و کشاورزی", "cat": "غذا و صنایع غذایی", "prov": "تهران", "city": "تهران", "pub": "2026-11-22", "dl": "2026-12-12", "days": 20, "raw": 73, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "2005005420000043", "url": "https://mozayedegar.com/listing/2208735", "route": "پیشنهاد تأمین و سرو غذای گرم در رستوران‌های شرکت", "nxt": "دریافت اسناد ۲۰۰۵۰۰۵۴۲۰۰۰۰۴۳ و استعلام تعداد رستوران‌ها و پرس روزانه", "sup": "شرکت‌های پذیرایی با شبکه توزیع شهری", "unit": "امور قراردادهای شرکت آب و فاضلاب تهران", "judge": "کارفرمای دولتی در تهران؛ لوژیستیک توزیع روزانه عامل تمایز است.", "parts": {"source": 3, "fit": 5, "prob": 4, "money": 3, "urg": 3, "comp": 3, "complete": 4}, "run": "۲"}, {"id": 2196714, "title": "مناقصه تکمیل انبار استراتژیک غذا و دارو دانشگاه علوم پزشکی اراک در اراک", "org": "دانشگاه علوم پزشکی استان مرکزی", "domain": "سلامت و آموزش", "cat": "خدمات سلامت", "prov": "مرکزی", "city": "اراک", "pub": "2026-11-16", "dl": "2026-11-28", "days": 5, "raw": 72, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2196714", "route": "پیشنهاد پیمانکاری تکمیل انبار (ابنیه + تجهیز)", "nxt": "دریافت اسناد مناقصه 2005000288000037 و بازدید محل", "sup": "پیمانکاران ابنیه و تأسیسات سردخانه", "unit": "معاونت غذا و دارو دانشگاه علوم پزشکی اراک", "judge": "پروژه مشخص با کارفرمای دولتی؛ مسیر پرداخت شفاف.", "parts": {"source": 3, "fit": 4, "prob": 4, "money": 3, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}, {"id": 2198265, "title": "مناقصه خدمات مشاوره طراحی و پیاده‌سازی سامانه انتقال قبوض گاز به سامانه مودیان، داشبورد مدیریتی و مغایرت‌گیری در ۳۱ استان با تحویل سورس", "org": "شرکت ملی گاز ایران", "domain": "فناوری و نرم‌افزار", "cat": "نرم‌افزار", "prov": "تهران", "city": "تهران", "pub": "2026-11-16", "dl": "2026-11-29", "days": 6, "raw": 72, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2198265", "route": "پیشنهاد مستقیم به‌عنوان مجری سامانه + اتحاد با تأمین‌کننده زیرساخت", "nxt": "تماس با امور قراردادهای شرکت ملی گاز و دریافت اسناد فراخوان 2005093863000014", "sup": "شرکت‌های نرم‌افزاری با سابقه سامانه‌های مالیاتی/مودیان", "unit": "معاونت فناوری اطلاعات / امور قراردادها", "judge": "موضوع دقیقاً در توان تیم‌های نرم‌افزاری است؛ مهلت کوتاه (۷ روز) مزیت برای بازیگر آماده است.", "parts": {"source": 3, "fit": 5, "prob": 3, "money": 3, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}, {"id": 2198264, "title": "مناقصه نگهداشت، پشتیبانی و توسعه سامانه‌های مشترکین و هوش تجاری و زیرساخت‌های آن در تهران", "org": "شرکت ملی گاز ایران", "domain": "فناوری و نرم‌افزار", "cat": "نرم‌افزار", "prov": "تهران", "city": "تهران", "pub": "2026-11-16", "dl": "2026-11-29", "days": 6, "raw": 72, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2198264", "route": "پیشنهاد مستقیم در قالب قرارداد پشتیبانی سالانه", "nxt": "درخواست اسناد فراخوان 2005093863000015 و بررسی SLA موجود", "sup": "شرکت‌های پشتیبانی نرم‌افزار و هوش تجاری", "unit": "معاونت فناوری اطلاعات", "judge": "قرارداد نگهداشت، درآمد تکرارشونده می‌سازد؛ اما رقابت با تأمین‌کننده فعلی سخت است.", "parts": {"source": 3, "fit": 5, "prob": 3, "money": 3, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}, {"id": 2204976, "title": "مناقصه خدمات طراحی، نظارت کارگاهی و نظارت عالیه پروژه‌های منطقه ویژه اقتصادی گرمسار", "org": "شرکت مدیریت منطقه ویژه اقتصادی گرمسار", "domain": "خدمات کسب‌وکار", "cat": "مهندسی و مشاوره", "prov": "سمنان", "city": "گرمسار", "pub": "2026-11-18", "dl": "2026-12-01", "days": 8, "raw": 72, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2204976", "route": "پیشنهاد مستقیم خدمات مشاوره و نظارت", "nxt": "ارسال درخواست اسناد فراخوان 2005090674000012 و بررسی رزومه مورد نیاز", "sup": "مهندسان مشاور دارای رتبه نظارت", "unit": "معاونت فنی منطقه ویژه گرمسار", "judge": "خدمات مشاوره/نظارت با بلیت متوسط و چرخه فروش کوتاه؛ رقابت متوسط.", "parts": {"source": 3, "fit": 5, "prob": 3, "money": 3, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}, {"id": 2211470, "title": "مناقصه اجرای پروژه دیوار حائل در سطح شهر و احداث جان‌پناه در رودهن، دماوند، استان تهران", "org": "شهرداری رودهن", "domain": "عمران و تأسیسات", "cat": "عمران و شهرسازی", "prov": "تهران", "city": "دماوند", "pub": "2026-11-22", "dl": "2026-12-06", "days": 13, "raw": 72, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2211470", "route": "پیشنهاد مستقیم پیمانکاری با رتبه‌بندی مرتبط", "nxt": "دریافت اسناد مناقصه 2005095773000038 و برآورد متره", "sup": "پیمانکاران ابنیه شهرهای کوچک", "unit": "معاونت عمرانی شهرداری رودهن", "judge": "پروژه اجرایی معمول شهری؛ مسیر تصمیم روشن و رقابت منطقه‌ای.", "parts": {"source": 3, "fit": 4, "prob": 4, "money": 3, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}, {"id": 2202109, "title": "مناقصه خرید، حمل، نصب، راه‌اندازی و آموزش یک دستگاه اتوآنالایزر در بیمارستان حکیم جرجانی گرگان", "org": "سازمان تامین اجتماعی", "domain": "سلامت و آموزش", "cat": "تجهیزات پزشکی", "prov": "گلستان", "city": "گرگان", "pub": "2026-11-18", "dl": "2026-11-29", "days": 6, "raw": 71, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2202109", "route": "پیشنهاد مستقیم با نمایندگی رسمی برند", "nxt": "دریافت مشخصات فنی اتوآنالایزر از تأمین اجتماعی گلستان", "sup": "نمایندگان رسمی تجهیزات آزمایشگاهی", "unit": "بیمارستان حکیم جرجانی / امور قراردادها", "judge": "بلیت خوب با حاشیه مناسب؛ نیازمند نمایندگی و خدمات پس از فروش.", "parts": {"source": 3, "fit": 4, "prob": 3, "money": 4, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}, {"id": 2209264, "title": "مناقصه تهیه، تأمین، اجرا و راه‌اندازی ترمینال فرآوری پسته با ظرفیت ۶ تن در مشهد", "org": "باغداری و زراعت مشهد", "domain": "غذا و کشاورزی", "cat": "کشاورزی", "prov": "خراسان رضوی", "city": "مشهد", "pub": "2026-11-22", "dl": "2026-12-02", "days": 10, "raw": 71, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "اعلام نشده", "url": "https://mozayedegar.com/listing/2209264", "route": "پیشنهاد EPC کوچک: تأمین، نصب و راه‌اندازی ترمینال فرآوری پسته", "nxt": "دریافت شرح کار ۶ تن/ساعت و بازدید سایت", "sup": "سازندگان خط فرآوری پسته و پیمانکاران تأسیسات", "unit": "واحد فنی شرکت باغداری و زراعت مشهد", "judge": "پروژه سرمایه‌ای با ارزش بالا؛ نیازمند توان مهندسی و ضمانت.", "parts": {"source": 3, "fit": 4, "prob": 3, "money": 4, "urg": 5, "comp": 3, "complete": 3}, "run": "۲"}, {"id": 2209266, "title": "مناقصه خرید یک دستگاه استارتر آبی ۱۳۰۰ کیلووات در خدابنده، زنجان", "org": "شرکت سیمان زنجان", "domain": "تجارت و پخش", "cat": "ماشین‌آلات صنعتی", "prov": "زنجان", "city": "زنجان", "pub": "2026-11-22", "dl": "2026-12-02", "days": 9, "raw": 70, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2209266", "route": "پیشنهاد مستقیم با پروفرمای واردات یا نمایندگی برند", "nxt": "دریافت مشخصات فنی استارتر ۱۳۰۰ کیلووات و مهلت پیشنهاد قیمت", "sup": "واردکنندگان تجهیزات برق صنعتی", "unit": "واحد بازرگانی سیمان زنجان", "judge": "بلیت بزرگ‌تر و حاشیه بهتر، اما نیاز به پیش‌پرداخت ارزی و زمان تأمین دارد.", "parts": {"source": 3, "fit": 4, "prob": 3, "money": 4, "urg": 5, "comp": 3, "complete": 2}, "run": "۱"}, {"id": 2196132, "title": "مناقصه انجام امور حقوقی اداره کل منابع طبیعی و آبخیزداری در اردبیل", "org": "سازمان منابع طبیعی و آبخیزداری کشور", "domain": "خدمات کسب‌وکار", "cat": "مالی/بیمه/حقوقی", "prov": "اردبیل", "city": "اردبیل", "pub": "2026-11-16", "dl": "2026-12-02", "days": 9, "raw": 69, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2196132", "route": "پیشنهاد از طریق وکیل/موسسه حقوقی دارای سابقه پرونده‌های دولتی", "nxt": "استعلام دامنه پرونده‌ها و شرایط تصدی از اداره کل", "sup": "موسسات حقوقی و وکلای دارای پروانه", "unit": "مدیریت حقوقی اداره کل منابع طبیعی اردبیل", "judge": "دامنه کوچک ولی ورود آسان؛ مناسب شروع رابطه با بدنه دولتی.", "parts": {"source": 3, "fit": 5, "prob": 3, "money": 2, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}, {"id": 2209150, "title": "مناقصه خرید کیسه جامبوبگ ظرفیت ۱۳۰۰ کیلوگرمی مناسب بسته‌بندی سازه فلزی در تهران", "org": "شرکت نفت پاسارگاد", "domain": "غذا و کشاورزی", "cat": "بسته‌بندی", "prov": "تهران", "city": "تهران", "pub": "2026-11-22", "dl": "2026-12-12", "days": 20, "raw": 69, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "2005110052000029", "url": "https://mozayedegar.com/listing/2209150", "route": "پیشنهاد مستقیم تأمین جامبوبگ ۱۳۰۰ کیلوگرمی", "nxt": "دریافت اسناد ۲۰۰۵۱۱۰۰۵۲۰۰۰۰۲۹ و مشخصات پارچه/دوخت", "sup": "تولیدکنندگان جامبوبگ و کیسه صنعتی", "unit": "واحد بازرگانی شرکت نفت پاسارگاد", "judge": "کالای صنعتی استاندارد؛ تصمیم خرید سریع و تکرارپذیر.", "parts": {"source": 3, "fit": 5, "prob": 3, "money": 3, "urg": 3, "comp": 3, "complete": 4}, "run": "۲"}, {"id": 2208268, "title": "مناقصه خرید آنتی‌اسکالانت، متابی‌سولفیت سدیم و شوینده‌های اسیدی و قلیایی سایت آب‌شیرین‌کن در تهران", "org": "شرکت سیمان هرمزگان", "domain": "تجارت و پخش", "cat": "مواد شیمیایی", "prov": "هرمزگان, تهران", "city": "تهران", "pub": "2026-11-22", "dl": "2026-11-25", "days": 2, "raw": 68, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2208268", "route": "پیشنهاد مستقیم به‌عنوان تأمین‌کننده/واردکننده شیمیایی", "nxt": "استعلام حجم و مشخصات فنی آنتی‌اسکالانت و متابی‌سولفیت از واحد بازرگانی", "sup": "واردکنندگان مواد شیمیایی آب‌شیرین‌کن", "unit": "واحد بازرگانی سیمان هرمزگان", "judge": "کالای استاندارد و تکرارشونده؛ خرید مکرر یعنی امکان قرارداد سالانه.", "parts": {"source": 3, "fit": 4, "prob": 3, "money": 3, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}, {"id": 2205074, "title": "مناقصه عمومی دو مرحله‌ای خرید ماشین‌آلات و تجهیزات خط فرآوری و تولید مشتقات آب‌پنیر در تهران", "org": "شرکت بازرگانی صنایع شیرایران", "domain": "غذا و کشاورزی", "cat": "غذا و صنایع غذایی", "prov": "تهران", "city": "تهران", "pub": "2026-11-18", "dl": "2026-12-08", "days": 16, "raw": 68, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "2005106824000009", "url": "https://mozayedegar.com/listing/2205074", "route": "پیشنهاد به‌عنوان نماینده/تأمین‌کننده ماشین‌آلات خط فرآوری", "nxt": "دریافت اسناد ۲۰۰۵۱۰۶۸۲۴۰۰۰۰۰۹ و مشخصات ظرفیت خط", "sup": "نمایندگان سازندگان خارجی خطوط فرآوری لبنیات", "unit": "واحد بازرگانی شرکت بازرگانی صنایع شیر ایران", "judge": "مناقصه دو مرحله‌ای = ارزیابی فنی سنگین؛ ورود واقعی فقط با نمایندگی رسمی.", "parts": {"source": 3, "fit": 4, "prob": 3, "money": 4, "urg": 3, "comp": 3, "complete": 4}, "run": "۲"}, {"id": 2204590, "title": "مناقصه خرید پوکه آمپول‌های بی‌رنگ ۲، ۵ و ۱۰ میلی‌لیتری در تهران", "org": "شرکت لابراتوارهای سینا دارو سهامی عام", "domain": "غذا و کشاورزی", "cat": "بسته‌بندی", "prov": "البرز", "city": "کرج", "pub": "2026-11-18", "dl": "2026-11-24", "days": 1, "raw": 67, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2204590", "route": "پیشنهاد مستقیم به‌عنوان تولیدکننده یا واردکننده شیشه‌آلات دارویی", "nxt": "استعلام تعداد و تلورانس ابعاد پوکه آمپول ۲، ۵ و ۱۰ میلی‌لیتری", "sup": "تولیدکنندگان شیشه دارویی", "unit": "واحد خرید شرکت سینا دارو", "judge": "کالای مصرفی خط تولید دارو؛ مشتری پایدار با سفارش‌های تکراری.", "parts": {"source": 3, "fit": 4, "prob": 3, "money": 2, "urg": 5, "comp": 4, "complete": 3}, "run": "۱"}, {"id": 2209275, "title": "مناقصه خرید آهن‌آلات و مصالح ساختمانی، نصب مبلمان شهری و تأمین مواد غذایی در شهرهای قدس و گلستان", "org": "سازمان همیاری شهرداری‌های استان تهران", "domain": "عمران و تأسیسات", "cat": "مصالح ساختمانی", "prov": "تهران", "city": "قدس, تهران", "pub": "2026-11-22", "dl": "2026-11-28", "days": 5, "raw": 67, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2209275", "route": "پیشنهاد بسته کامل (تأمین + نصب) به‌صورت کنسرسیوم", "nxt": "دریافت فهرست اقلام سه‌گانه (آهن‌آلات، مبلمان شهری، اقلام غذایی)", "sup": "پیمانکاران تجهیز شهری و تأمین‌کنندگان آهن‌آلات", "unit": "معاونت فنی سازمان همیاری شهرداری‌های تهران", "judge": "بسته ترکیبی؛ اگر یک تأمین‌کننده همه اقلام را داشته باشد مزیت بزرگ است.", "parts": {"source": 3, "fit": 4, "prob": 3, "money": 3, "urg": 5, "comp": 3, "complete": 2}, "run": "۱"}, {"id": 2200574, "title": "مناقصه عمومی یک‌مرحله‌ای تأمین خدمات، تجهیزات و قطعات حوزه فناوری اطلاعات در بوشهر", "org": "سازمان بنادر و دریانوردی", "domain": "فناوری و نرم‌افزار", "cat": "نرم‌افزار", "prov": "بوشهر", "city": "بوشهر", "pub": "2026-11-18", "dl": "2026-12-05", "days": 12, "raw": 67, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2200574", "route": "پیشنهاد مستقیم با تکیه بر تأمین قطعات", "nxt": "دریافت فهرست اقلام از سازمان بنادر بوشهر و ارزیابی امکان تأمین", "sup": "تأمین‌کنندگان تجهیزات شبکه و قطعات IT", "unit": "معاونت مهندسی و توسعه", "judge": "بسته «خدمات + تجهیزات + قطعات» یکجا؛ برای بازرگان فنی مناسب است.", "parts": {"source": 3, "fit": 4, "prob": 3, "money": 3, "urg": 5, "comp": 3, "complete": 2}, "run": "۱"}, {"id": 2208839, "title": "مناقصه خرید آجر نسوز برای کارخانه سیمان خوزستان در استان خوزستان", "org": "شرکت سیمان خوزستان", "domain": "عمران و تأسیسات", "cat": "مصالح ساختمانی", "prov": "خوزستان", "city": "—", "pub": "2026-11-22", "dl": "2026-11-25", "days": 2, "raw": 66, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2208839", "route": "پیشنهاد مستقیم به‌عنوان تأمین‌کننده نسوز", "nxt": "استعلام تعداد و ابعاد آجر نسوز و بازدید فنی", "sup": "تولیدکنندگان آجر و جرم نسوز", "unit": "واحد خرید کارخانه سیمان خوزستان", "judge": "کالای مصرفی تکرارشونده کارخانه؛ رقابت زیاد ولی سفارش‌های مکرر.", "parts": {"source": 3, "fit": 4, "prob": 3, "money": 2, "urg": 5, "comp": 4, "complete": 2}, "run": "۱"}, {"id": 2196747, "title": "مناقصه واگذاری خدمات مشاوره، روان‌درمانی، مددکاری و روان‌پزشکی مرکز مشاوره و سبک زندگی اسلامی ایرانی معاونت فرهنگی و دانشجویی در تهران", "org": "دانشگاه علوم پزشکی ایران", "domain": "سلامت و آموزش", "cat": "خدمات سلامت", "prov": "تهران", "city": "تهران", "pub": "2026-11-16", "dl": "2026-11-28", "days": 5, "raw": 65, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2196747", "route": "پیشنهاد تیم مشاوره/کلینیک دارای مجوز", "nxt": "استعلام دامنه خدمات و استانداردهای نیروی انسانی", "sup": "مراکز مشاوره و تیم‌های روان‌شناسی دارای پروانه", "unit": "مرکز مشاوره دانشگاه علوم پزشکی ایران", "judge": "خدمات تخصصی با ورود آسان ولی ارزش قرارداد کوچک.", "parts": {"source": 3, "fit": 4, "prob": 3, "money": 2, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}, {"id": 2205753, "title": "مناقصه خدمات جبران هزینه‌های درمان ۱۰۰۰ نفر از کارکنان گروه فولاد در تهران", "org": "صندوق بازنشستگی کشوری", "domain": "خدمات کسب‌وکار", "cat": "مالی/بیمه/حقوقی", "prov": "تهران", "city": "تهران", "pub": "2026-11-19", "dl": "2026-11-29", "days": 6, "raw": 65, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2205753", "route": "پیشنهاد از طریق شرکت بیمه‌گر یا به‌عنوان کارگزار", "nxt": "دریافت شرایط پوشش ۱۰۰۰ نفر و سابقه هزینه‌های درمان", "sup": "بیمه‌گران درمان تکمیلی", "unit": "مدیریت درمان صندوق بازنشستگی کشوری", "judge": "رقابت انحصاری با بیمه‌گران بزرگ؛ به‌تنهایی شانس پایین.", "parts": {"source": 3, "fit": 4, "prob": 3, "money": 3, "urg": 5, "comp": 2, "complete": 2}, "run": "۱"}, {"id": 2209271, "title": "مناقصه خرید حدود ۱۲۰ هزار تن ماسه دوبارشور طبیعی و ۶۰ هزار تن شن شکسته در آبیک", "org": "شرکت تهران بتون", "domain": "عمران و تأسیسات", "cat": "مصالح ساختمانی", "prov": "قزوین, تهران", "city": "آبیک, قزوین, تهران", "pub": "2026-11-22", "dl": "2026-11-29", "days": 6, "raw": 65, "total": 65, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2209271", "route": "پیشنهاد مستقیم تأمین مصالح با حمل", "nxt": "استعلام قیمت روز ماسه و شن و شرایط حمل به آبیک", "sup": "معدن‌داران شن و ماسه", "unit": "واحد بازرگانی شرکت تهران بتون", "judge": "حجم بسیار بالا ولی حاشیه کم؛ فقط برای بازیگر با لجستیک قوی.", "parts": {"source": 3, "fit": 3, "prob": 3, "money": 3, "urg": 5, "comp": 4, "complete": 2}, "run": "۱"}, {"id": 2209249, "title": "مناقصه خرید پهپاد dji mavic 3 multispectral به‌همراه کیت باتری و دوربین طیف‌سنج در سیرجان", "org": "شرکت کشاورزی سیرجان بنیاد", "domain": "غذا و کشاورزی", "cat": "کشاورزی", "prov": "کرمان", "city": "سیرجان", "pub": "2026-11-22", "dl": "2026-11-28", "days": 5, "raw": 64, "total": 64, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2209249", "route": "پیشنهاد مستقیم کالا با گارانتی رسمی", "nxt": "استعلام مدل دقیق، تعداد و شرایط گارانتی", "sup": "نمایندگان رسمی پهپاد کشاورزی", "unit": "واحد فنی شرکت کشاورزی سیرجان", "judge": "خرید تجهیزاتی مشخص و کم‌ابهام؛ حاشیه محدود اما فروش سریع.", "parts": {"source": 3, "fit": 3, "prob": 3, "money": 2, "urg": 5, "comp": 4, "complete": 4}, "run": "۱"}, {"id": 2205714, "title": "مناقصه نگهداشت مرکز داده وزارت بهداشت شامل عملیات الکتریکال، شبکه فعال و غیرفعال و نرم‌افزار زیرساخت در سمنان", "org": "دانشگاه علوم پزشکی و خدمات بهداشتی  درمانی استان سمنان", "domain": "فناوری و نرم‌افزار", "cat": "نرم‌افزار", "prov": "سمنان", "city": "سمنان", "pub": "2026-11-18", "dl": "2026-12-02", "days": 9, "raw": 64, "total": 64, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2205714", "route": "اتحاد با پیمانکار تأسیسات برق + ارائه بخش نرم‌افزاری", "nxt": "استعلام شرح کار از دانشگاه علوم پزشکی سمنان و بررسی نیاز به رتبه‌بندی", "sup": "پیمانکاران مرکز داده، تأمین‌کنندگان تجهیزات شبکه", "unit": "معاونت توسعه و مدیریت منابع", "judge": "دامنه ترکیبی (الکتریکال + شبکه + نرم‌افزار) است؛ تنها با کنسرسیوم قابل پوشش است.", "parts": {"source": 3, "fit": 3, "prob": 3, "money": 3, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}, {"id": 2201959, "title": "مناقصه خرید دو دستگاه الکترولیز نمک طعام در ایلام", "org": "شرکت آب و فاضلاب", "domain": "تجارت و پخش", "cat": "مواد شیمیایی", "prov": "ایلام", "city": "ایلام", "pub": "2026-11-18", "dl": "2026-12-03", "days": 10, "raw": 63, "total": 63, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2201959", "route": "پیشنهاد مستقیم با گزینه تأمین داخلی یا واردات", "nxt": "استعلام ظرفیت و مشخصات دو دستگاه الکترولیز از آبفای ایلام", "sup": "سازندگان تجهیزات تصفیه و الکترولیز", "unit": "امور بازرگانی آبفای ایلام", "judge": "نیاز فنی مشخص ولی بازار تأمین محدود؛ مزیت برای تأمین‌کننده متخصص.", "parts": {"source": 3, "fit": 3, "prob": 3, "money": 3, "urg": 5, "comp": 3, "complete": 2}, "run": "۱"}, {"id": 2198214, "title": "مناقصه تأمین نیروی خدمات بهداشت دهان و دندان در یزد و نیروی خدمات بهیاری در زارچ", "org": "دانشگاه علوم پزشکی یزد", "domain": "سلامت و آموزش", "cat": "خدمات سلامت", "prov": "یزد", "city": "یزد", "pub": "2026-11-16", "dl": "2026-11-28", "days": 5, "raw": 61, "total": 61, "band": "نیازمند بررسی بیشتر", "ident": "—", "url": "https://mozayedegar.com/listing/2198214", "route": "پیشنهاد تأمین نیروی خدماتی با مجوز", "nxt": "استعلام تعداد نیرو و شیفت‌ها در یزد و زارچ", "sup": "شرکت‌های تأمین نیروی خدمات بهداشتی", "unit": "معاونت درمان / امور قراردادها", "judge": "حاشیه کم و ریسک منابع انسانی؛ مناسب بازیگر با تیم آماده.", "parts": {"source": 3, "fit": 3, "prob": 3, "money": 2, "urg": 5, "comp": 3, "complete": 3}, "run": "۱"}];
+const $ = s => document.querySelector(s);
+const fa = n => String(n).replace(/[0-9]/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
+const NAMES = {source:"اعتبار منبع", fit:"تناسب با حوزه", prob:"احتمال تبدیل",
+  money:"جذابیت مالی", urg:"فوریت", comp:"رقابت و ورود", complete:"کامل بودن"};
+const W = {source:20, fit:20, prob:20, money:15, urg:10, comp:10, complete:5};
+
+const doms = [...new Set(DATA.map(x => x.domain))];
+doms.forEach(d => { const o=document.createElement("option"); o.value=d; o.textContent=d; $("#dom").appendChild(o); });
+
+let state = {q:"", dom:"", sort:"raw", urg:false, r2:false, sel:null};
+
+function filtered(){
+  let a = DATA.filter(x =>
+    (!state.dom || x.domain === state.dom) &&
+    (!state.urg || x.days <= 7) &&
+    (!state.r2 || x.run === "۲") &&
+    (!state.q || (x.title+x.org+x.prov+x.cat).toLowerCase().includes(state.q.toLowerCase())))
+  if (state.sort === "raw") a.sort((p,q) => q.raw - p.raw || p.days - q.days);
+  if (state.sort === "days") a.sort((p,q) => p.days - q.days);
+  if (state.sort === "dl") a.sort((p,q) => p.dl.localeCompare(q.dl));
+  return a;
+}
+function pillFor(x){
+  if (x.days <= 2) return '<span class="pill dang">فوری</span>';
+  if (x.days <= 7) return '<span class="pill warn">این هفته</span>';
+  return '<span class="pill ok">باز</span>';
+}
+function renderCards(a){
+  const top = Math.max(...DATA.map(x=>x.raw));
+  const avg = (DATA.reduce((s,x)=>s+x.raw,0)/DATA.length).toFixed(1);
+  const c = [
+    ["فرصت در پایگاه", fa(DATA.length)],
+    ["نمایش فعلی", fa(a.length)],
+    ["مهلت ≤ ۷ روز", fa(DATA.filter(x=>x.days<=7).length)],
+    ["بالاترین امتیاز خام", fa(top)],
+    ["میانگین امتیاز خام", fa(avg)],
+    ["تأییدشده با سند", "۰"]
+  ];
+  $("#cards").innerHTML = c.map(([k,v]) =>
+    `<div class="card"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+}
+function renderTable(){
+  const a = filtered();
+  renderCards(a);
+  $("#tb").innerHTML = a.length ? a.map((x,i) => `
+    <tr data-id="${x.id}">
+      <td class="t">${x.title}</td>
+      <td>${x.org}</td>
+      <td>${x.prov}</td>
+      <td>${x.cat}</td>
+      <td>${x.dl} ${pillFor(x)}</td>
+      <td>${fa(x.days)}</td>
+      <td class="score">${fa(x.raw)}</td>
+      <td>${fa(x.total)}</td>
+    </tr>`).join("") : '<tr><td colspan="8" class="empty">چیزی با این فیلترها پیدا نشد.</td></tr>';
+  document.querySelectorAll("#tb tr[data-id]").forEach(tr =>
+    tr.onclick = () => show(+tr.dataset.id));
+}
+function show(id){
+  const x = DATA.find(v => v.id === id); if (!x) return;
+  const rows = Object.keys(NAMES).map(k => {
+    const sc = x.parts[k] || 0;
+    return `<tr><td>${NAMES[k]}</td><td>${fa(sc)}/۵</td><td>${fa(W[k])}</td><td>${fa(Math.round(sc/5*W[k]))}</td></tr>`;
+  }).join("");
+  $("#detail").innerHTML = `<div class="dbox">
+    <h2>${x.title}</h2>
+    <div class="muted">${x.domain} · ${x.cat} · دوره ${x.run}</div>
+    <div class="grid2">
+      <div class="kv"><b>خریدار:</b> ${x.org}</div>
+      <div class="kv"><b>واحد تماس:</b> ${x.unit}</div>
+      <div class="kv"><b>استان/شهر:</b> ${x.prov} / ${x.city}</div>
+      <div class="kv"><b>انتشار:</b> ${x.pub}</div>
+      <div class="kv"><b>مهلت:</b> ${x.dl} (${fa(x.days)} روز)</div>
+      <div class="kv"><b>شماره فراخوان:</b> ${x.ident}</div>
+      <div class="kv"><b>مبلغ:</b> اعلام نشده</div>
+      <div class="kv"><b>وضعیت:</b> تأییدنشده (منبع سطح ۳)</div>
+    </div>
+    <div class="kv" style="margin-top:6px"><b>مسیر ورود:</b> ${x.route}</div>
+    <div class="kv"><b>تأمین‌کنندگان/رقبا:</b> ${x.sup}</div>
+    <div class="kv"><b>اقدام بعدی:</b> ${x.nxt}</div>
+    <div class="kv" style="margin-top:8px"><b>داوری امتیاز:</b> <span class="muted">${x.judge}</span></div>
+    <table class="bk">${rows}<tr><td><b>جمع</b></td><td></td><td></td>
+      <td><b>${fa(x.raw)}</b> <span class="muted">(تأییدشده: ${fa(x.total)})</span></td></tr></table>
+    <div style="margin-top:10px"><a href="${x.url}" target="_blank" rel="noopener">مشاهده منبع (mozayedegar)</a></div>
+  </div>`;
+  $("#detail").scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+$("#q").oninput = e => { state.q = e.target.value; renderTable(); };
+$("#dom").onchange = e => { state.dom = e.target.value; renderTable(); };
+$("#sort").onchange = e => { state.sort = e.target.value; renderTable(); };
+$("#urg").onchange = e => { state.urg = e.target.checked; renderTable(); };
+$("#r2").onchange = e => { state.r2 = e.target.checked; renderTable(); };
+document.querySelectorAll("th[data-s]").forEach(th => th.onclick = () => {
+  const k = th.dataset.s;
+  state.sort = (k === "raw" || k === "total") ? "raw" : (k === "days" ? "days" : "dl");
+  $("#sort").value = state.sort; renderTable();
+});
+$("#csv").onclick = () => {
+  const a = filtered();
+  const head = ["عنوان","خریدار","استان","دسته","انتشار","مهلت","روز مانده","امتیاز خام","تأییدشده","شماره فراخوان","منبع"];
+  const lines = [head.join(",")].concat(a.map(x => [x.title,x.org,x.prov,x.cat,x.pub,x.dl,x.days,x.raw,x.total,x.ident,x.url]
+    .map(v => '"' + String(v).replace(/"/g,'""') + '"').join(",")));
+  const blob = new Blob(["\ufeff" + lines.join("\n")], {type:"text/csv;charset=utf-8"});
+  const u = URL.createObjectURL(blob), l = document.createElement("a");
+  l.href = u; l.download = "market-hunter-opportunities.csv"; l.click(); URL.revokeObjectURL(u);
+};
+renderTable();
+</script>
+</body></html>
