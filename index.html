@@ -79,7 +79,7 @@
     <thead><tr>
       <th data-s="title">فرصت</th><th data-s="org">خریدار</th><th data-s="prov">استان</th>
       <th data-s="cat">دسته</th><th data-s="dl">مهلت</th><th data-s="days">روز</th>
-      <th data-s="raw">امتیاز خام</th><th data-s="total">تأییدشده</th>
+      <th data-s="raw">امتیاز خام</th><th data-s="total">تأییدشده</th><th>تأمین</th>
     </tr></thead>
     <tbody id="tb"></tbody>
   </table>
@@ -148,6 +148,7 @@ function renderTable(){
       <td>${fa(x.days)}</td>
       <td class="score">${fa(x.raw)}</td>
       <td>${fa(x.total)}</td>
+      <td><span class="supzone" data-i="${x.id}" data-t="${encodeURIComponent(x.title)}" data-o="${encodeURIComponent(x.org||"")}" data-d="${x.dl}">…</span></td>
     </tr>`).join("") : '<tr><td colspan="8" class="empty">چیزی با این فیلترها پیدا نشد.</td></tr>';
   document.querySelectorAll("#tb tr[data-id]").forEach(tr =>
     tr.onclick = () => show(+tr.dataset.id));
@@ -202,4 +203,56 @@ $("#csv").onclick = () => {
 };
 renderTable();
 </script>
+
+<style>
+.supzone .sb{font-family:inherit;font-size:11.5px;border:1px solid #17453a;background:#122b25;color:#37c2a0;
+  border-radius:99px;padding:2px 9px;cursor:pointer;white-space:nowrap}
+.supzone .sb:hover{background:#17453a}
+.supzone a.sb{text-decoration:none;display:inline-block}
+#supbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px;color:#93a6b8;font-size:12.5px}
+#supbar b{color:#e8eef4}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#122b25;border:1px solid #17453a;
+  color:#37c2a0;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
+#toast.on{opacity:1}
+</style>
+<div id="supbar"></div>
+<div id="toast"></div>
+<script>
+const SUP_MAP = {"2206784":"supply.html"};
+async function exists(u){try{const r=await fetch(u,{method:"HEAD"});return r.ok}catch(e){return false}}
+async function initSupply(){
+  const zones=[...document.querySelectorAll(".supzone")];
+  let ready=0;
+  for(const z of zones){
+    const id=z.dataset.i, mapped=SUP_MAP[id], url=mapped||("supply-"+id+".html");
+    const has=mapped?true:await exists(url);
+    if(has){
+      ready++;
+      z.innerHTML='<a class="sb" href="'+url+'" target="_blank" rel="noopener">نقشه تأمین ↗</a>';
+    }else{
+      z.innerHTML='<button class="sb" type="button">ساخت نقشه</button>';
+      z.querySelector("button").onclick=()=>{
+        const title=decodeURIComponent(z.dataset.t), org=decodeURIComponent(z.dataset.o);
+        const p="نقشه بازار تأمین برای این فرصت بساز:\n"+
+                "کالا/خدمت: "+title+"\n"+
+                "خریدار: "+org+"\n"+
+                "مهلت: "+z.dataset.d+"\n"+
+                "مقدار و مشخصات: (اینجا بنویس یا خالی بگذار)\n"+
+                "و نتیجه را روی داشبورد منتشر کن.";
+        navigator.clipboard.writeText(p).then(()=>{
+          const t=document.getElementById("toast");
+          t.textContent="درخواست کپی شد — در چت بچسبان تا ایجنت اجرا شود";
+          t.classList.add("on"); setTimeout(()=>t.classList.remove("on"),2600);
+        });
+      };
+    }
+  }
+  document.getElementById("supbar").innerHTML =
+    "نقشه‌های تأمین آماده: <b>"+ready+"</b> از <b>"+zones.length+"</b> فرصت — "+
+    "دکمه «ساخت نقشه» درخواست آماده را کپی می‌کند؛ پس از اجرای ایجنت، همین دکمه به لینک نقشه تبدیل می‌شود.";
+}
+const _rt=renderTable; renderTable=function(){_rt();initSupply();};
+initSupply();
+</script>
+
 </body></html>
