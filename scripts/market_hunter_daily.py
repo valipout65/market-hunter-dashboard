@@ -55,6 +55,17 @@ EQUIP_TERMS = ["خط تولید", "ماشین‌آلات", "ماشین آلات"
 BIG_TERMS = ["سالانه", "شش‌ماهه", "شش ماهه", "سال ۱۴۰۵", "سال ۱۴۰۶", "ماه مبارک",
              "تن ", "هزار تن", "روزانه", "دانشجویی", "بیماران", "پرسنل"]
 
+# فقط ارقام انتهایی مقایسه می‌شود تا پیشوند ETEND و اختلاف قالب مهم نباشد
+VERIFIED_NOTICES = {
+    "2005106824000009",   # خط فرآوری مشتقات آب‌پنیر — بازرگانی صنایع شیر ایران
+    "2005114884000009",   # سبد معیشتی رمضان — هپکو
+    "2005000383000015",   # کترینگ دانشجویی — علوم پزشکی بوشهر
+}
+
+
+def vkey(x):
+    return re.sub(r"\D", "", str(x or ""))
+
 NOTICE_RE = re.compile(r"(ETEND[-A-Z0-9]*\d{8,}|\b\d{16}\b|\b\d{11,16}\b)")
 
 W = {"source": 20, "fit": 20, "prob": 20, "money": 15, "urg": 10, "comp": 10, "complete": 5}
@@ -272,8 +283,16 @@ def build(items, existing, today):
         cats = [c.get("title") for c in (it.get("categories") or []) if c.get("title")]
 
         prev = by_notice.get(re.sub(r"\s+", "", notice)) if notice else None
-        verified = bool(prev and prev.get("verified"))
-        p, raw, total = score(title, desc, days, notice, verified)
+        verified = bool((prev and prev.get("verified")) or vkey(notice) in VERIFIED_NOTICES)
+        if prev and prev.get("verified"):
+            # امتیاز قضاوت‌شده اجرای انسانی/ایجنتی حفظ می‌شود؛ فقط تاریخ‌ها تازه می‌شوند
+            p = prev.get("parts") or {}
+            raw = int(prev.get("raw") or 0)
+            total = int(prev.get("total") or 0)
+            if days is not None and days < 0:
+                total = min(total, 20)
+        else:
+            p, raw, total = score(title, desc, days, notice, verified)
 
         rec = {
             "id": prev["id"] if prev else ("MH-" + (notice[-8:] if notice else str(it.get("id")))),
@@ -295,6 +314,7 @@ def build(items, existing, today):
             "parts": p,
             "run": "به‌روزرسانی خودکار",
             "verified": verified,
+            "verified": verified,
             "descr": ("توضیحات کامل منتشر نشد؛ فقط خلاصه اعلان و مهلت."
                       if len(desc) < 400 else "خلاصه توضیحات از منبع تجمیع‌کننده دریافت شد."),
         }
@@ -306,6 +326,47 @@ def build(items, existing, today):
             added += 1
     return out, added
 
+
+
+
+def jdatetime_to_gregorian(jy, jm, jd):
+    """شمسی → میلادی (روزشمار)، بدون کتابخانه خارجی."""
+    jy2 = jy - 979
+    j_day_no = 365 * jy2 + (jy2 // 33) * 8 + ((jy2 % 33) + 3) // 4
+    for i in range(jm - 1):
+        j_day_no += 31 if i < 6 else 30
+    j_day_no += jd - 1
+    g_day_no = j_day_no + 79
+    gy = 1600 + 400 * (g_day_no // 146097)
+    g_day_no %= 146097
+    leap = True
+    if g_day_no >= 36525:
+        g_day_no -= 1
+        gy += 100 * (g_day_no // 36524)
+        g_day_no %= 36524
+        if g_day_no >= 365:
+            g_day_no += 1
+        else:
+            leap = False
+    gy += 4 * (g_day_no // 1461)
+    g_day_no %= 1461
+    if g_day_no >= 366:
+        leap = False
+        g_day_no -= 1
+        gy += g_day_no // 365
+        g_day_no %= 365
+    gd = g_day_no + 1
+    months = [31, 29 if leap else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    gm = 1
+    for m in months:
+        if gd <= m:
+            break
+        gd -= m
+        gm += 1
+    try:
+        return datetime.date(gy, gm, gd)
+    except Exception:
+        return None
 
 
 def finger(r):
@@ -392,13 +453,30 @@ def main():
     now = datetime.datetime.utcnow() + datetime.timedelta(hours=3, minutes=30)
     today = now.date()
 
-    existing = []
     here = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", DATA_PATH)
+    existing = []
+
+    # ۱) نسخه منتشرشده روی gh-pages (منبع حقیقت — شامل رکوردهای تأییدشده اجراهای قبلی)
+    if os.environ.get("GITHUB_TOKEN") and os.environ.get("REPO"):
+        try:
+            import base64 as _b64
+            cur = gh_api("GET", "contents/%s?ref=%s" % (DATA_PATH, BRANCH))
+            if cur and cur.get("content"):
+                remote = json.loads(_b64.b64decode(cur["content"]).decode("utf-8"))
+                existing = remote.get("items", [])
+                print("loaded %d existing records from gh-pages" % len(existing))
+        except Exception as e:
+            print("remote load failed (%s) — falling back to local cache" % type(e).__name__)
+
+    # ۲) کش محلی (برای اجرای داخل سندباکس)
     if os.path.exists(here):
         try:
-            existing = json.load(open(here, encoding="utf-8")).get("items", [])
+            local = json.load(open(here, encoding="utf-8")).get("items", [])
+            if local:
+                existing = dedupe(existing + local) if existing else local
+                print("merged local cache: %d records" % len(existing))
         except Exception:
-            existing = []
+            pass
 
     raw_items, moz_status = fetch_mozayedegar()
     sources = [{
@@ -412,6 +490,24 @@ def main():
                         "note": "نیازمند عضویت/IP ایران" if st != "ok" else ""})
 
     items, added = build(raw_items, existing, today)
+
+    # روزهای باقی‌مانده را برای همه رکوردها (قدیمی و تازه) دوباره حساب کن
+    for r in items:
+        dl = str(r.get("dl") or "")
+        parts = re.split(r"[/-]", dl)
+        if len(parts) == 3 and parts[0].isdigit():
+            try:
+                y, mo, dy = int(parts[0]), int(parts[1]), int(parts[2])
+                if y > 1500:            # بعضی منابع تاریخ میلادی می‌دهند
+                    g = datetime.date(y, mo, dy)
+                else:
+                    g = jdatetime_to_gregorian(y, mo, dy)
+                if g:
+                    r["days"] = (g - today).days
+                    r["band"] = band(int(r.get("total") or 0), r["days"])
+            except Exception:
+                pass
+
     items = dedupe(items)
     items = prune(items, today)
     items.sort(key=lambda r: (-int(r.get("total") or 0), -int(r.get("days") or -999)))
